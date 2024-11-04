@@ -2,8 +2,6 @@
 
 use Drupal\bo_system\Upgrader\UpgradeConfig;
 
-
-
 /**
  * Implements hook_install().
  */
@@ -99,11 +97,10 @@ function _bo_system_import_optional_views() {
       // Importa il file di configurazione della vista.
       $config_data = \Drupal::service('config.storage.sync')->read($config_path);
       
-      if ($config_data) {
+      if (!$config_data) {
         $configsToUpdate = [
           'bo_system/optional' => [
-            'core.entity_form_display.taxonomy_term.ita_tipi_punti_contatto.default',
-            'core.entity_view_display.node.ita_luogo_interesse_pubblico.indirizzo_uo',
+            $config
           ],
         ];
         UpgradeConfig::updateConfigs($configsToUpdate);
