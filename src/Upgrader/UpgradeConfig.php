@@ -31,9 +31,18 @@ class UpgradeConfig {
     $configFactory = \Drupal::configFactory();
     assert($configFactory instanceof ConfigFactoryInterface);
 
-    foreach ($configs as $module => $moduleConfigs) {
+    foreach ($configs as $moduleName => $moduleConfigs) {
+      $paths = explode('/', $moduleName);
+      if (count($paths) == 2) {
+        $module = $paths[0];
+        $folder = $paths[1];
+      }
+      else {
+        $module = $paths[0];
+        $folder = 'install';
+      }
       foreach ($moduleConfigs as $moduleConfig) {
-        $configPath = $extensionListModule->getPath($module) . '/config/install';
+        $configPath = $extensionListModule->getPath($module) . '/config/' . $folder;
         $data = (new FileStorage($configPath))->read($moduleConfig);
         assert(is_array($data));
         $configFactory->getEditable($moduleConfig)

@@ -95,9 +95,22 @@ function _bo_system_import_optional_views() {
     $config_path = $module_path . '/config/optional/' . $config . '.yml';
     // Verifica se il file esiste.
     if (file_exists($config_path)) {
+      $config_path = 'modules/contrib/bo_system/config/optional/views.view.booking_events_manage.yml';
       // Importa il file di configurazione della vista.
-      $config_data = \Drupal::service('config.storage.sync')->read($config);
-      \Drupal::configFactory()->getEditable($config)->setData($config_data)->save();
+      $config_data = \Drupal::service('config.storage.sync')->read($config_path);
+      
+      if ($config_data) {
+        $configsToUpdate = [
+          'bo_system/optional' => [
+            'core.entity_form_display.taxonomy_term.ita_tipi_punti_contatto.default',
+            'core.entity_view_display.node.ita_luogo_interesse_pubblico.indirizzo_uo',
+          ],
+        ];
+        UpgradeConfig::updateConfigs($configsToUpdate);
+      }
+      else {
+        \Drupal::configFactory()->getEditable($config)->setData($config_data)->save();
+      }
       // Messaggio di conferma.
       \Drupal::messenger()->addMessage(t('La configurazione ' . $config . ' è stata importata con successo.'));
     } else {
