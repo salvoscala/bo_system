@@ -1,0 +1,185 @@
+<?php
+
+use Drupal\Core\Render\Markup;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\commerce_price\Price;
+use Drupal\commerce_store\Entity\Store;
+
+/**
+ * Implements hook_theme().
+ */
+function bo_system_theme() {
+  return [
+    'bo_system_dashboard_bookable' => [
+      'template' => 'bo-system-dashboard-bookable',
+      'variables' => [
+        'uid' => NULL,
+      ],
+    ],
+    'bo_system_dashboard_user' => [
+      'template' => 'bo-system-dashboard-user',
+      'variables' => [
+        'uid' => NULL,
+      ],
+    ],
+  ];
+
+}
+
+/**
+ * Implements hook_user_insert().
+ *
+ * Quando un nuovo utente viene inserito, setta il fuso orario dal cookie.
+ *
+ * @param \Drupal\user\UserInterface $account
+ *   L'oggetto utente che è stato appena creato.
+ */
+function bo_system_user_insert(\Drupal\user\UserInterface $account) {
+  // Verifica se il cookie 'il-user-timezone' è settato.
+  if (isset($_COOKIE['il-user-timezone'])) {
+    // Recupera il valore del fuso orario dal cookie.
+    $user_timezone = $_COOKIE['il-user-timezone'];
+    
+    // Verifica che il fuso orario recuperato sia valido.
+    if (in_array($user_timezone, timezone_identifiers_list())) {
+      // Imposta il fuso orario per l'utente appena creato.
+      $account->set('timezone', $user_timezone);
+
+      // Salva l'account utente aggiornato.
+      $account->save();
+    }
+    else {
+      \Drupal::logger('bo_system')->warning('Fuso orario non valido: ' . $user_timezone);
+    }
+  }
+  else {
+    \Drupal::logger('bo_system')->notice('Cookie "il-user-timezone" non trovato.');
+  }
+}
+
+/**
+ * Implements hook_form_alter();
+ */
+function bo_system_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if ($form_id == 'private_message_add_form') {
+
+    $form['message']['widget'][0]['#format'] = 'plain_text';
+    $form['message']['widget'][0]['#allowed_formats'] = ['plain_text'];
+    $form['message']['widget'][0]["#after_build"] = [];
+
+    $recipient = \Drupal::request()->query->get('recipient');
+    if (!$recipient) {
+      // Impediamo agli utenti di inviare un messaggio se il recipient non e' impostato.
+      unset($form['actions']);
+      unset($form['subject']);
+      unset($form['members']);
+      unset($form['footer']);
+      unset($form['message']);
+      \Drupal::messenger()->addWarning('Recipient is mandatory');
+    }
+    else {
+
+      // Controlliamo che l'utente abbia una relazione con il recipient.
+      $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+      $bookable_entity_nids = $node_storage->getQuery()
+        ->condition('type', 'bookable_entity') // Tipo di contenuto "bookable_entity"
+        ->condition('uid', $recipient)
+        ->accessCheck(FALSE)
+        ->execute();
+
+      $event_nids = [];
+      if ($bookable_entity_nids) {
+        $event_nids = $node_storage->getQuery()
+          ->condition('type', 'event') // Tipo di contenuto "evento"
+          ->condition('uid', \Drupal::currentUser()->id()) // Autore dell'evento è l'utente corrente
+          ->condition('field_bookable_entity.target_id', $bookable_entity_nids, 'IN') // Condizione IN sul campo field_persona
+          ->accessCheck(FALSE)
+          ->execute();
+      }
+      if (!$event_nids) {
+        // Impediamo agli utenti di inviare un messaggio se il recipient non e' correlato all'utente.
+        unset($form['actions']);
+        unset($form['subject']);
+        unset($form['members']);
+        unset($form['footer']);
+        unset($form['message']);
+        \Drupal::messenger()->addWarning('Impossibile to send a message. Recipient not related.');
+        
+        return;
+      }
+
+      $user = \Drupal\user\Entity\User::load($recipient);
+
+      $recipient_name = $user->getAccountName();
+      if ($user->hasField('field_first_name') && $user->hasField('field_last_name')) {
+        $recipient_name = $user->get('field_first_name')->value . ' ' . $user->get('field_last_name')->value;
+      }
+  
+      $form['intro'] = [
+        '#markup' => Markup::create('<div class="mb-4">Recipient: <strong>' . $recipient_name . '</strong></div>'),
+        '#weight' => -100,
+      ];
+      $form['members']['#prefix'] = '<div class="hidden">';
+      $form['members']['#suffix'] = '</div>';
+    }
+  }
+  
+  if ($form_id == 'user_register_form') {
+    if (isset($_COOKIE['il-user-timezone'])) {
+     $form['timezone']['timezone']['#default_value'] = $_COOKIE['il-user-timezone'];
+      //  This is the library that adds timezone default value.
+      if (isset($form['timezone']['#attached'])) {
+        foreach ($form['timezone']['#attached']['library'] as $key => $library) {
+          if ($library == 'core/drupal.timezone') {
+            unset($form['timezone']['#attached']['library'][$key]);
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_presave() for user entities.
+ */
+function bo_system_user_presave(EntityInterface $user) {
+  if (\Drupal::currentUser()->id() == $user->id()) {
+    $timezone = $user->getTimezone() ?? '';
+    setcookie("il-user-timezone", $timezone, time()+3600*24*30*6, '/');
+  }
+}
+
+/**
+ * Implements hook_entity_presave().
+ */
+function bo_system_entity_presave(EntityInterface $entity) {
+  if ($entity->getEntityTypeId() == 'commerce_order_item') {
+    if ($entity->bundle() == 'booking') {
+      if ($price = $entity->get('field_consulting_price')->number) {
+        $currency = 'EUR';
+        $store_storage = \Drupal::entityTypeManager()->getStorage('commerce_store');
+        $default_store = $store_storage->loadDefault();
+      
+        if ($default_store) {
+          // Ottieni l'oggetto della valuta predefinita.
+          $currency = $default_store->getDefaultCurrencyCode();
+        }
+
+        $unit_price = new Price($price, $currency);
+        $entity->setUnitPrice($unit_price);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for page templates.
+ */
+function bo_system_preprocess_page(array &$variables) {
+  // Check if the current page uses the admin theme.
+  if (\Drupal::service('theme.manager')->getActiveTheme()->getName() === 'claro') {
+    // Attach the CSS library to the page.
+    $variables['#attached']['library'][] = 'bo_system/admin-theme-css';
+  }
+}

@@ -1,0 +1,10 @@
+uuid: 5212ddba-9750-40a2-91b9-5d1f8fc1dd63
+langcode: en
+status: true
+dependencies: {  }
+id: bookable
+label: Bookable
+weight: 4
+is_admin: null
+permissions:
+  - 'access user profiles'

@@ -1,0 +1,85 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - commerce_order.commerce_order_item_type.booking
+    - field.field.commerce_order_item.booking.field_bookable_entity
+    - field.field.commerce_order_item.booking.field_consulting_date
+    - field.field.commerce_order_item.booking.field_consulting_duration
+    - field.field.commerce_order_item.booking.field_consulting_price
+    - field.field.commerce_order_item.booking.field_notes
+  module:
+    - commerce_order
+    - commerce_price
+    - datetime
+id: commerce_order_item.booking.default
+targetEntityType: commerce_order_item
+bundle: booking
+mode: default
+content:
+  field_bookable_entity:
+    type: entity_reference_autocomplete
+    weight: 9
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_consulting_date:
+    type: datetime_default
+    weight: 6
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_consulting_duration:
+    type: number
+    weight: 5
+    region: content
+    settings:
+      placeholder: ''
+    third_party_settings: {  }
+  field_consulting_price:
+    type: commerce_price_default
+    weight: 3
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_notes:
+    type: string_textarea
+    weight: 7
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  purchased_entity:
+    type: entity_reference_autocomplete
+    weight: -1
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  quantity:
+    type: commerce_quantity
+    weight: 1
+    region: content
+    settings:
+      placeholder: ''
+      step: '1'
+    third_party_settings: {  }
+  unit_price:
+    type: commerce_unit_price
+    weight: 2
+    region: content
+    settings:
+      require_confirmation: true
+    third_party_settings: {  }
+hidden:
+  adjustments: true
+  created: true
+  total_price: true

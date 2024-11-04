@@ -1,0 +1,23 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - commerce_order
+    - options
+id: commerce_order.field_consulting_duration
+field_name: field_consulting_duration
+entity_type: commerce_order
+type: list_integer
+settings:
+  allowed_values:
+    -
+      value: 60
+      label: '1 hour'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

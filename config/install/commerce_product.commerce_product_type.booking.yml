@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies: {  }
+id: booking
+label: Booking
+traits: {  }
+locked: false
+description: ''
+variationType: booking
+variationTypes:
+  - booking
+multipleVariations: true
+injectVariationFields: true

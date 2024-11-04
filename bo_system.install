@@ -1,0 +1,142 @@
+<?php
+
+use Drupal\bo_system\Upgrader\UpgradeConfig;
+
+
+
+/**
+ * Implements hook_install().
+ */
+function bo_system_install() {
+  // Crea il campo `field_first_name`.
+  \Drupal::service('entity_type.manager')
+    ->getStorage('field_storage_config')
+    ->create([
+      'field_name' => 'field_first_name',
+      'entity_type' => 'user',
+      'type' => 'string',
+      'settings' => [
+        'max_length' => 255,
+      ],
+      'cardinality' => 1,
+      'translatable' => TRUE,
+      'locked' => FALSE,
+    ])
+    ->save();
+
+  // Aggiungi il campo `field_first_name` all'entità `user`.
+  \Drupal::service('entity_type.manager')
+    ->getStorage('field_config')
+    ->create([
+      'field_name' => 'field_first_name',
+      'entity_type' => 'user',
+      'bundle' => 'user',
+      'label' => t('First name'),
+      'description' => t('The first name of the user.'),
+      'required' => TRUE,
+      'settings' => [
+        'default_value' => '',
+      ],
+      'translatable' => TRUE,
+    ])
+    ->save();
+
+  // Crea il campo `field_last_name`.
+  \Drupal::service('entity_type.manager')
+    ->getStorage('field_storage_config')
+    ->create([
+      'field_name' => 'field_last_name',
+      'entity_type' => 'user',
+      'type' => 'string',
+      'settings' => [
+        'max_length' => 255,
+      ],
+      'cardinality' => 1,
+      'translatable' => TRUE,
+      'locked' => FALSE,
+    ])
+    ->save();
+
+  // Aggiungi il campo `field_last_name` all'entità `user`.
+  \Drupal::service('entity_type.manager')
+    ->getStorage('field_config')
+    ->create([
+      'field_name' => 'field_last_name',
+      'entity_type' => 'user',
+      'bundle' => 'user',
+      'label' => t('Last name'),
+      'description' => t('The last name of the user.'),
+      'required' => TRUE,
+      'settings' => [
+        'default_value' => '',
+      ],
+      'translatable' => TRUE,
+    ])
+    ->save();
+
+    _bo_system_import_optional_views();
+    
+}
+
+/**
+ * Funzione personalizzata per importare le configurazioni opzionali.
+ */
+function _bo_system_import_optional_views() {
+  // Ottieni il percorso del modulo utilizzando il servizio extension.list.module.
+  $module_path = \Drupal::service('extension.list.module')->getPath('bo_system');
+  // Percorso della configurazione opzionale.
+  $configs = [];
+
+  $configs[] = 'views.view.booking_events_manage';
+  $configs[] = 'views.view.bookings';
+
+  foreach ($configs as $config) {
+
+    $config_path = $module_path . '/config/optional/' . $config . '.yml';
+    // Verifica se il file esiste.
+    if (file_exists($config_path)) {
+      // Importa il file di configurazione della vista.
+      $config_data = \Drupal::service('config.storage.sync')->read($config);
+      \Drupal::configFactory()->getEditable($config)->setData($config_data)->save();
+      // Messaggio di conferma.
+      \Drupal::messenger()->addMessage(t('La configurazione ' . $config . ' è stata importata con successo.'));
+    } else {
+      // Messaggio di errore se il file non esiste.
+      \Drupal::messenger()->addError(t('Il file di configurazione per ' . $config . ' non è stato trovato.'));
+    }
+  }
+}
+
+/*
+  // Esempio cancellazione configurazione.
+  $configFactory = \Drupal::configFactory();
+  $configFactory
+    ->getEditable('field.field.node.ita_luogo_interesse_pubblico.field_ita_orario_pubblico_note')
+    ->delete();
+  $configFactory
+    ->getEditable('field.storage.node.field_ita_orario_pubblico_note')
+    ->delete();
+
+
+  // Esempio creazione field.
+  $configsForCreateFields = [
+    'bo_system' => [
+      [
+        'config' => 'field.field.node.bookable_unit.field_machine_name',
+        'storage' => 'field.storage.node.field_machine_name',
+      ],
+    ],
+  ];
+  UpgradeConfig::createNewFields($configsForCreateFields);
+
+
+  // Esempio rilettura configurazioni.
+  $configsToUpdate = [
+    'bo_system' => [
+      'core.entity_form_display.taxonomy_term.ita_tipi_punti_contatto.default',
+      'core.entity_view_display.node.ita_luogo_interesse_pubblico.indirizzo_uo',
+    ],
+  ];
+  UpgradeConfig::updateConfigs($configsToUpdate);
+
+*/

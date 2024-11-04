@@ -1,0 +1,139 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.bookable_entity.body
+    - field.field.node.bookable_entity.field_closed_on_holidays
+    - field.field.node.bookable_entity.field_consulting_duration
+    - field.field.node.bookable_entity.field_max_bookable_interval
+    - field.field.node.bookable_entity.field_open_hours
+    - field.field.node.bookable_entity.field_rate
+    - field.field.node.bookable_entity.field_reservation_notice
+    - field.field.node.bookable_entity.field_unavailable_periods
+    - node.type.bookable_entity
+  module:
+    - commerce_price
+    - office_hours
+    - options
+    - smart_date
+    - text
+    - user
+id: node.bookable_entity.default
+targetEntityType: node
+bundle: bookable_entity
+mode: default
+content:
+  body:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 101
+    region: content
+  field_closed_on_holidays:
+    type: boolean
+    label: above
+    settings:
+      format: default
+      format_custom_false: ''
+      format_custom_true: ''
+    third_party_settings: {  }
+    weight: 7
+    region: content
+  field_consulting_duration:
+    type: list_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 9
+    region: content
+  field_max_bookable_interval:
+    type: number_integer
+    label: above
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    weight: 6
+    region: content
+  field_open_hours:
+    type: office_hours
+    label: above
+    settings:
+      day_format: long
+      time_format: G
+      compress: false
+      grouped: false
+      show_empty: false
+      show_closed: all
+      closed_format: Closed
+      all_day_format: 'All day open'
+      separator:
+        days: '<br />'
+        grouped_days: ' - '
+        day_hours: ': '
+        hours_hours: '-'
+        more_hours: ', '
+      current_status:
+        position: ''
+        open_text: 'Currently open!'
+        closed_text: 'Currently closed'
+      exceptions:
+        title: 'Exception hours'
+        replace_exceptions: false
+        restrict_exceptions_to_num_days: 7
+        date_format: long
+        all_day_format: 'All day open'
+      timezone_field: ''
+      office_hours_first_day: ''
+      schema:
+        enabled: false
+    third_party_settings: {  }
+    weight: 102
+    region: content
+  field_rate:
+    type: commerce_price_default
+    label: above
+    settings:
+      strip_trailing_zeroes: false
+      currency_display: symbol
+    third_party_settings: {  }
+    weight: 12
+    region: content
+  field_reservation_notice:
+    type: list_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 8
+    region: content
+  field_unavailable_periods:
+    type: smartdate_default
+    label: above
+    settings:
+      timezone_override: UTC
+      format_type: medium
+      format: default
+      force_chronological: false
+      add_classes: false
+      time_wrapper: true
+      localize: false
+      parts:
+        - start
+        - end
+      duration:
+        separator: ' | '
+        unit: ''
+        decimals: 2
+        suffix: h
+    third_party_settings: {  }
+    weight: 5
+    region: content
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 100
+    region: content
+hidden:
+  private_message_link: true
+  search_api_excerpt: true

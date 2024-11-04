@@ -1,0 +1,7 @@
+
+# Definizione del link "Edit Profile" sotto "My Account"
+bo_system.custom_edit_profile:
+  menu_name: account
+  class: Drupal\bo_system\Plugin\Menu\EditProfile
+  title: 'Edit Profile'
+  weight: 2

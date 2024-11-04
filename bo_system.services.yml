@@ -1,0 +1,22 @@
+services:
+  bo_system.route_subscriber:
+    class: 'Drupal\bo_system\Routing\RouteSubscriber'
+    tags:
+      - { name: event_subscriber }
+
+  bo_system.commands:
+    class: Drupal\bo_system\Drush\Commands\BoSystemDrushCommands
+    arguments:
+      - '@module_handler'
+    tags:
+      -  { name: drush.command }
+
+  bo_system.booking_utility:
+    class: Drupal\bo_system\Services\BookingService
+    arguments: ['@entity_type.manager', '@current_user']
+
+  bo_system.order_subscriber:
+    class: Drupal\bo_system\EventSubscriber\OrderEventSubscriber
+    tags:
+      - { name: needs_destruction }
+      - { name: event_subscriber }

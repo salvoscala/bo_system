@@ -1,0 +1,24 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_max_bookable_interval
+    - node.type.bookable_entity
+id: node.bookable_entity.field_max_bookable_interval
+field_name: field_max_bookable_interval
+entity_type: node
+bundle: bookable_entity
+label: 'Max bookable interval'
+description: '@TODO: Fix description: max date bookable from now'
+required: true
+translatable: false
+default_value:
+  -
+    value: 365
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: integer

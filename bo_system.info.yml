@@ -1,0 +1,29 @@
+name: 'BO System'
+type: module
+description: 'Manage BO System features'
+package: BO
+core_version_requirement: ^10 || ^11
+dependencies:
+  - add_content_by_bundle
+  - commerce_cart
+  - commerce_checkout
+  - commerce_order
+  - commerce_price
+  - commerce_product
+  - datetime
+  - entity_reference_revisions
+  - field
+  - fullcalendar_view
+  - inline_entity_form
+  - menu_ui
+  - node
+  - office_hours
+  - options
+  - path
+  - simple_mail
+  - single_datetime
+  - smart_date
+  - state_machine
+  - text
+  - twig_tweak
+  - views

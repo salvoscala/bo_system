@@ -1,0 +1,7 @@
+admin-theme-css:
+  css:
+    theme:
+      css/admin_styles.css: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings

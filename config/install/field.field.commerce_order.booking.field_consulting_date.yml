@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - commerce_order.commerce_order_type.booking
+    - field.storage.commerce_order.field_consulting_date
+  module:
+    - datetime
+id: commerce_order.booking.field_consulting_date
+field_name: field_consulting_date
+entity_type: commerce_order
+bundle: booking
+label: 'Consulting date'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: datetime

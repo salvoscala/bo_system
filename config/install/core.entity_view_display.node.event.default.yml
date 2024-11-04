@@ -1,0 +1,98 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.event.body
+    - field.field.node.event.field_bookable_entity
+    - field.field.node.event.field_cancellation_notes
+    - field.field.node.event.field_customer
+    - field.field.node.event.field_order
+    - field.field.node.event.field_state
+    - field.field.node.event.field_when
+    - node.type.event
+  module:
+    - options
+    - smart_date
+    - text
+    - user
+id: node.event.default
+targetEntityType: node
+bundle: event
+mode: default
+content:
+  body:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 6
+    region: content
+  field_bookable_entity:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 8
+    region: content
+  field_cancellation_notes:
+    type: basic_string
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 7
+    region: content
+  field_customer:
+    type: entity_reference_entity_view
+    label: inline
+    settings:
+      view_mode: compact
+      link: false
+    third_party_settings: {  }
+    weight: 5
+    region: content
+  field_order:
+    type: entity_reference_entity_id
+    label: inline
+    settings: {  }
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_state:
+    type: list_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 3
+    region: content
+  field_when:
+    type: smartdate_default
+    label: inline
+    settings:
+      timezone_override: ''
+      format_type: medium
+      format: default
+      force_chronological: false
+      add_classes: false
+      time_wrapper: true
+      localize: false
+      parts:
+        start: start
+        end: end
+        duration: duration
+      duration:
+        separator: ' | '
+        unit: ''
+        decimals: 2
+        suffix: h
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  private_message_link: true
+  search_api_excerpt: true

@@ -1,0 +1,35 @@
+
+bo_system.dashboard:
+  path: '/dashboard'
+  defaults:
+    _admin_route: '\Drupal\bo_system\Controller\Dashboard::isAdminRoute'
+    _controller: '\Drupal\bo_system\Controller\Dashboard::pageContent'
+    _title_callback: '\Drupal\bo_system\Controller\Dashboard::addTitle'
+  requirements:
+    _role: 'authenticated'
+
+bo_system.host_cancel_booking_form:
+  path: '/host-delete-event/{node}'
+  defaults:
+    _form: '\Drupal\bo_system\Form\HostCancelBookingForm'
+    _title: 'Delete event'
+  requirements:
+    _custom_access: '\Drupal\bo_system\Form\HostCancelBookingForm::access'
+    _permission: 'access content'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+
+bo_system.customer_cancel_booking_form:
+  path: '/customer-delete-event/{node}'
+  defaults:
+    _form: '\Drupal\bo_system\Form\CustomerCancelBookingForm'
+    _title: 'Delete event'
+  requirements:
+    _custom_access: '\Drupal\bo_system\Form\CustomerCancelBookingForm::access'
+    _permission: 'access content'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'

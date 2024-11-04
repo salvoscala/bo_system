@@ -1,0 +1,49 @@
+<div class="guide-info mt-5">
+  <h3>{{'Guide info'|t}}</h3>
+  {{drupal_view('guide_info_dashboard', 'block_1')}}
+</div>
+<div class="tabs mt-5">
+  <h3>{{'Your events'|t}}</h3>
+  
+  <div class="row">
+    <div class="col-sm-7">
+      <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <a class="nav-link active" id="simple-tab-1" data-bs-toggle="tab" href="#simple-tabpanel-1" role="tab" aria-controls="simple-tabpanel-1" aria-selected="false">{{'Upcoming events'|t}}</a>
+        </li>
+        <li class="nav-item" role="presentation">
+          <a class="nav-link" id="simple-tab-2" data-bs-toggle="tab" href="#simple-tabpanel-2" role="tab" aria-controls="simple-tabpanel-2" aria-selected="false">{{'Past events'|t}}</a>
+        </li>
+      </ul>
+
+      <div class="tab-content pt-5" id="tab-content">
+        <div class="tab-pane active" id="simple-tabpanel-1" role="tabpanel" aria-labelledby="simple-tab-1">
+          {% if drupal_view('booking_events_manage', 'upcoming_events') is not empty %}
+            {{ drupal_view('booking_events_manage', 'upcoming_events') }}
+          {% else %}
+            <p>Nessun evento in arrivo.</p>
+          {% endif %}
+        </div>
+        <div class="tab-pane" id="simple-tabpanel-2" role="tabpanel" aria-labelledby="simple-tab-2">
+          {% if drupal_view('booking_events_manage', 'past_events') is not empty %}
+            {{ drupal_view('booking_events_manage', 'past_events') }}
+          {% else %}
+            <p>Nessun evento passato trovato.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+      
+    <div class="col-sm-5" style="font-size: .7rem;">
+      {% if drupal_view('booking_events_manage', 'calendar') is not empty %}
+        {{ drupal_view('booking_events_manage', 'calendar') }}
+      {% else %}
+        <p>Nessun evento nel calendario.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<h3>{{'Private messages'|t}}</h3>
+{#{{drupal_view('private_messages', 'block_1')}}#}
+
