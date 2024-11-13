@@ -184,7 +184,6 @@ class BookingForm extends FormBase {
 
           $form['date'] = [
             '#type' => 'single_date_time',
-            '#title' => $this->t('Prenota un appuntamento'),
             '#allow_times' => 60,
             '#inline' => TRUE,
             '#start_date' => FALSE,
