@@ -1,15 +1,16 @@
+uuid: 03c6a9be-4f42-40cd-9901-0e534bf0fe2f
 langcode: en
 status: true
 dependencies:
   config:
     - commerce_order.commerce_order_type.booking
-    - field.storage.commerce_order.field_bookable_entity
-    - node.type.bookable_entity
-id: commerce_order.booking.field_bookable_entity
-field_name: field_bookable_entity
+    - field.storage.commerce_order.field_booking_event
+    - node.type.event
+id: commerce_order.booking.field_booking_event
+field_name: field_booking_event
 entity_type: commerce_order
 bundle: booking
-label: 'Bookable entity'
+label: 'Booking event'
 description: ''
 required: false
 translatable: false
@@ -19,7 +20,7 @@ settings:
   handler: 'default:node'
   handler_settings:
     target_bundles:
-      bookable_entity: bookable_entity
+      event: event
     sort:
       field: _none
       direction: ASC

@@ -3,16 +3,14 @@ status: true
 dependencies:
   config:
     - commerce_order.commerce_order_type.booking
-    - field.field.commerce_order.booking.field_bookable_entity
-    - field.field.commerce_order.booking.field_consulting_date
-    - field.field.commerce_order.booking.field_consulting_duration
+    - field.field.commerce_order.booking.field_booking_event
     - field.field.commerce_order.booking.field_notes
   module:
     - commerce_order
-    - datetime
-    - options
     - state_machine
     - user
+_core:
+  default_config_hash: f9x61lot2w02vqcTxMhgKpbs4ftaeC2tl6bCG5DZv-0
 id: commerce_order.booking.default
 targetEntityType: commerce_order
 bundle: booking
@@ -45,29 +43,13 @@ content:
     third_party_settings: {  }
     weight: 16
     region: content
-  field_bookable_entity:
+  field_booking_event:
     type: entity_reference_label
     label: above
     settings:
       link: true
     third_party_settings: {  }
-    weight: 17
-    region: content
-  field_consulting_date:
-    type: datetime_default
-    label: above
-    settings:
-      timezone_override: ''
-      format_type: medium
-    third_party_settings: {  }
-    weight: 11
-    region: content
-  field_consulting_duration:
-    type: list_default
-    label: above
-    settings: {  }
-    third_party_settings: {  }
-    weight: 12
+    weight: 18
     region: content
   field_notes:
     type: basic_string

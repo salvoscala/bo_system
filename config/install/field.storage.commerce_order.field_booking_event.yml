@@ -1,16 +1,17 @@
+uuid: 04937c2a-f48d-4695-b80d-728268992865
 langcode: en
 status: true
 dependencies:
   module:
     - commerce_order
-    - datetime
-id: commerce_order.field_consulting_date
-field_name: field_consulting_date
+    - node
+id: commerce_order.field_booking_event
+field_name: field_booking_event
 entity_type: commerce_order
-type: datetime
+type: entity_reference
 settings:
-  datetime_type: datetime
-module: datetime
+  target_type: node
+module: core
 locked: false
 cardinality: 1
 translatable: true

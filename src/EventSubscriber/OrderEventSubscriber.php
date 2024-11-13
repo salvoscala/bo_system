@@ -26,6 +26,8 @@ class OrderEventSubscriber implements EventSubscriberInterface, DestructableInte
 
   protected $consultingInfo;
 
+  protected $bookingEvent;
+
   /**
    * {@inheritdoc}
    *
@@ -61,6 +63,12 @@ class OrderEventSubscriber implements EventSubscriberInterface, DestructableInte
           foreach ($this->consultingInfo as $field => $value) {
             if ($order->hasField($field)) {
               $order->set($field, $value);
+            }
+          }
+
+          if (isset($this->bookingEvent)) {
+            if ($order->hasField('field_booking_event')) {
+              $order->set('field_booking_event', $this->bookingEvent);
             }
           }
           $order->save();
@@ -169,6 +177,7 @@ class OrderEventSubscriber implements EventSubscriberInterface, DestructableInte
 
     $node->save();
 
+    $this->bookingEvent = $node;
 
     $this->consultingInfo = [];
     if ($data) {
