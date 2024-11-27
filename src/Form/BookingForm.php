@@ -182,6 +182,30 @@ class BookingForm extends FormBase {
             unset($disabled_week_days[$open_day['day']]);
           }
 
+          if ($bookableEntity->hasField('field_unavailable_periods') && !$bookableEntity->field_unavailable_periods->isEmpty()) {
+            foreach ($bookableEntity->field_unavailable_periods->getValue() as $item) {
+              $duration = $item['end_value'] - $item['value'];
+              if ($duration > 86400) {
+                // Agiamo solo quando si tratta di una durata maggiore di un giorno.
+                // Converto i timestamp in DateTime per manipolazione.
+                $startItem = new \DateTime('@' . $item['value']);
+                $endItem = new \DateTime('@' . $item['end_value']);
+
+                // Imposto i fusi orari (se necessario).
+                $startItem->setTimezone(new \DateTimeZone('UTC'));
+                $endItem->setTimezone(new \DateTimeZone('UTC'));
+                // Controllo che il giorno sia completamente compreso.
+                $current = clone $startItem;
+
+                // Itero su tutti i giorni compresi tra inizio e fine.
+                while ($current <= $endItem) {
+                  $exclude_date[] = $current->format('d.m.Y'); // Formato richiesto.
+                  $current->modify('+1 day');
+                }
+              }
+            }
+          }
+
           $form['date'] = [
             '#type' => 'single_date_time',
             '#allow_times' => 60,
@@ -192,7 +216,7 @@ class BookingForm extends FormBase {
             '#year_start' => date('Y'),
             '#year_end' => date('Y', time() + 60 * 60 * 24 * 365),
             '#exclude_date' => implode("\n", $exclude_date),
-            '#disable_days' => [],//$disabled_week_days,
+            '#disable_days' => $disabled_week_days,
             '#datetimepicker_theme' => 'default',
             '#date_type' => 'date',
             '#hour_format' => 24,

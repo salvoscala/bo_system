@@ -4,7 +4,6 @@ use Drupal\Core\Render\Markup;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\commerce_price\Price;
-use Drupal\commerce_store\Entity\Store;
 
 /**
  * Implements hook_theme().
