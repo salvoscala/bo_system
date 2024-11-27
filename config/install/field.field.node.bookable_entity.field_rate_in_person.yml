@@ -2,18 +2,16 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.node.field_rate
+    - field.storage.node.field_rate_in_person
     - node.type.bookable_entity
   module:
     - commerce_price
-_core:
-  default_config_hash: YukHSOeQvadP-3x6EyiKvipih3AxSa_Fd0fMcKLhQ18
-id: node.bookable_entity.field_rate
-field_name: field_rate
+id: node.bookable_entity.field_rate_in_person
+field_name: field_rate_in_person
 entity_type: node
 bundle: bookable_entity
-label: Rate
-description: 'Price for online consultation. If not filled in, the online consultation booking will not be active.'
+label: 'in-person rate'
+description: 'Price for in-person consultation. If not filled out, in-person consultation booking will not be active.'
 required: false
 translatable: false
 default_value: {  }
