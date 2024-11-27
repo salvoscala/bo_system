@@ -33,3 +33,12 @@ bo_system.customer_cancel_booking_form:
     parameters:
       node:
         type: 'entity:node'
+
+bo_system.settings:
+  path: '/admin/config/bo-settings'
+  defaults:
+    _form: '\Drupal\bo_system\Form\SettingsForm'
+    _title: 'BO System Settings'
+  requirements:
+    _permission: 'administer site configuration'
+

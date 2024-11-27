@@ -5,3 +5,12 @@ bo_system.custom_edit_profile:
   class: Drupal\bo_system\Plugin\Menu\EditProfile
   title: 'Edit Profile'
   weight: 2
+
+bo_system.bo_settings:
+  title: 'BO System Settings'
+  description: 'Configure BO System settings.'
+  parent: system.admin_config
+  route_name: bo_system.settings
+  weight: 10
+  requirements:
+    _role: 'administrator'

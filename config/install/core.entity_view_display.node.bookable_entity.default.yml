@@ -9,6 +9,7 @@ dependencies:
     - field.field.node.bookable_entity.field_open_hours
     - field.field.node.bookable_entity.field_rate
     - field.field.node.bookable_entity.field_rate_in_person
+    - field.field.node.bookable_entity.field_rate_online
     - field.field.node.bookable_entity.field_reservation_notice
     - field.field.node.bookable_entity.field_unavailable_periods
     - node.type.bookable_entity
@@ -31,7 +32,7 @@ content:
     label: hidden
     settings: {  }
     third_party_settings: {  }
-    weight: 101
+    weight: 7
     region: content
   field_closed_on_holidays:
     type: boolean
@@ -41,14 +42,14 @@ content:
       format_custom_false: ''
       format_custom_true: ''
     third_party_settings: {  }
-    weight: 7
+    weight: 2
     region: content
   field_consulting_duration:
     type: list_default
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 9
+    weight: 4
     region: content
   field_max_bookable_interval:
     type: number_integer
@@ -57,7 +58,7 @@ content:
       thousand_separator: ''
       prefix_suffix: true
     third_party_settings: {  }
-    weight: 6
+    weight: 1
     region: content
   field_open_hours:
     type: office_hours
@@ -92,7 +93,7 @@ content:
       schema:
         enabled: false
     third_party_settings: {  }
-    weight: 102
+    weight: 8
     region: content
   field_rate:
     type: commerce_price_default
@@ -101,7 +102,7 @@ content:
       strip_trailing_zeroes: false
       currency_display: symbol
     third_party_settings: {  }
-    weight: 12
+    weight: 5
     region: content
   field_rate_in_person:
     type: commerce_price_default
@@ -110,14 +111,23 @@ content:
       strip_trailing_zeroes: false
       currency_display: symbol
     third_party_settings: {  }
-    weight: 103
+    weight: 9
+    region: content
+  field_rate_online:
+    type: commerce_price_default
+    label: above
+    settings:
+      strip_trailing_zeroes: false
+      currency_display: symbol
+    third_party_settings: {  }
+    weight: 10
     region: content
   field_reservation_notice:
     type: list_default
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 8
+    weight: 3
     region: content
   field_unavailable_periods:
     type: smartdate_default
@@ -139,12 +149,12 @@ content:
         decimals: 2
         suffix: h
     third_party_settings: {  }
-    weight: 5
+    weight: 0
     region: content
   links:
     settings: {  }
     third_party_settings: {  }
-    weight: 100
+    weight: 6
     region: content
 hidden:
   private_message_link: true

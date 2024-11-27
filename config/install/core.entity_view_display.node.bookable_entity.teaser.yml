@@ -10,6 +10,7 @@ dependencies:
     - field.field.node.bookable_entity.field_open_hours
     - field.field.node.bookable_entity.field_rate
     - field.field.node.bookable_entity.field_rate_in_person
+    - field.field.node.bookable_entity.field_rate_online
     - field.field.node.bookable_entity.field_reservation_notice
     - field.field.node.bookable_entity.field_unavailable_periods
     - node.type.bookable_entity
@@ -52,6 +53,7 @@ hidden:
   field_max_bookable_interval: true
   field_open_hours: true
   field_rate_in_person: true
+  field_rate_online: true
   field_reservation_notice: true
   field_unavailable_periods: true
   private_message_link: true

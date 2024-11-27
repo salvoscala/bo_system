@@ -6,6 +6,7 @@ dependencies:
     - field.field.node.event.field_bookable_entity
     - field.field.node.event.field_cancellation_notes
     - field.field.node.event.field_customer
+    - field.field.node.event.field_event_type
     - field.field.node.event.field_order
     - field.field.node.event.field_state
     - field.field.node.event.field_when
@@ -15,6 +16,8 @@ dependencies:
     - smart_date
     - text
     - user
+_core:
+  default_config_hash: 74MUWkZNHc-SvGTcffaY6u5IjLOMjRIztqEImApCdWc
 id: node.event.default
 targetEntityType: node
 bundle: event
@@ -50,6 +53,13 @@ content:
       link: false
     third_party_settings: {  }
     weight: 5
+    region: content
+  field_event_type:
+    type: list_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 9
     region: content
   field_order:
     type: entity_reference_entity_id

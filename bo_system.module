@@ -170,6 +170,46 @@ function bo_system_entity_presave(EntityInterface $entity) {
       }
     }
   }
+
+  if ($entity->getEntityTypeId() == 'node') {
+    if ($entity->bundle() == 'bookable_entity') {
+      // Impostiamo il rate.
+      $online = 0;
+      $in_person = 0;
+      if ($entity->hasField('field_rate_online') && !$entity->field_rate_online->isEmpty()) {
+        $online = $entity->get('field_rate_online')->getValue()[0]['number'];
+      }
+      if ($entity->hasField('field_rate_in_person') && !$entity->field_rate_in_person->isEmpty()) {
+        $in_person = $entity->get('field_rate_in_person')->getValue()[0]['number'];
+      }
+
+      $currency = 'EUR';
+      $store_storage = \Drupal::entityTypeManager()->getStorage('commerce_store');
+      $default_store = $store_storage->loadDefault();
+      $settings = \Drupal::state()->get('bo_system.settings');
+
+      if ($default_store) {
+        // Ottieni l'oggetto della valuta predefinita.
+        $currency = $default_store->getDefaultCurrencyCode();
+      }
+
+      $rate = 0;
+      if ($online < $in_person) {
+        $rate = $online;
+      }
+      else {
+        $rate = $in_person;
+      }
+
+      if ($settings['percentage'] > 0) {
+        $rate = $rate + ($rate * $settings['percentage'] / 100);
+      }
+      $rate_price = new Price(round($rate), $currency);
+
+      $entity->set('field_rate', $rate_price);
+
+    }
+  }
 }
 
 /**

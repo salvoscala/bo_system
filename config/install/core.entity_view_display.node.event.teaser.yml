@@ -7,6 +7,7 @@ dependencies:
     - field.field.node.event.field_bookable_entity
     - field.field.node.event.field_cancellation_notes
     - field.field.node.event.field_customer
+    - field.field.node.event.field_event_type
     - field.field.node.event.field_order
     - field.field.node.event.field_state
     - field.field.node.event.field_when
@@ -15,6 +16,8 @@ dependencies:
     - smart_date
     - text
     - user
+_core:
+  default_config_hash: Yc7CQXwmn0bqQLMCTAOuDijZZbhofRsXUqI9iT5WDTY
 id: node.event.teaser
 targetEntityType: node
 bundle: event
@@ -50,6 +53,7 @@ hidden:
   field_bookable_entity: true
   field_cancellation_notes: true
   field_customer: true
+  field_event_type: true
   field_order: true
   field_state: true
   private_message_link: true

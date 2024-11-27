@@ -1,0 +1,19 @@
+uuid: 7d80e6cb-15d4-4411-a92b-a2bade742488
+langcode: en
+status: true
+dependencies:
+  module:
+    - commerce_price
+    - node
+id: node.field_rate_online
+field_name: field_rate_online
+entity_type: node
+type: commerce_price
+settings: {  }
+module: commerce_price
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false
