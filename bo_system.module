@@ -176,6 +176,7 @@ function bo_system_entity_presave(EntityInterface $entity) {
       // Impostiamo il rate.
       $online = 0;
       $in_person = 0;
+      $bookingService = \Drupal::service('bo_system.booking_utility');
       if ($entity->hasField('field_rate_online') && !$entity->field_rate_online->isEmpty()) {
         $online = $entity->get('field_rate_online')->getValue()[0]['number'];
       }
@@ -186,7 +187,6 @@ function bo_system_entity_presave(EntityInterface $entity) {
       $currency = 'EUR';
       $store_storage = \Drupal::entityTypeManager()->getStorage('commerce_store');
       $default_store = $store_storage->loadDefault();
-      $settings = \Drupal::state()->get('bo_system.settings');
 
       if ($default_store) {
         // Ottieni l'oggetto della valuta predefinita.
@@ -201,13 +201,9 @@ function bo_system_entity_presave(EntityInterface $entity) {
         $rate = $in_person;
       }
 
-      if ($settings['percentage'] > 0) {
-        $rate = $rate + ($rate * $settings['percentage'] / 100);
-      }
+      $rate = $bookingService->getRealPrice($rate);
       $rate_price = new Price(round($rate), $currency);
-
       $entity->set('field_rate', $rate_price);
-
     }
   }
 }

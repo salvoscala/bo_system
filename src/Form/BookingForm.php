@@ -289,6 +289,36 @@ class BookingForm extends FormBase {
             ],
           ];
 
+
+          $consulting_types = [];
+          $currency_repository = \Drupal::service('commerce_price.currency_repository');
+          
+          if ($bookableEntity->hasField('field_rate_online') && !$bookableEntity->field_rate_online->isEmpty()) {
+            $online_rate = $bookableEntity->get('field_rate_online')->getValue();
+            $currency = $currency_repository->get($online_rate[0]['currency_code']);
+            // Ottiene la definizione della valuta.
+            $formatted_price = $this->bookingService->getRealPrice(number_format($online_rate[0]['number'], 0, ',', '.'));
+            $consulting_types['online'] = $this->t('Online at @price @symbol', ['@price' => $formatted_price, '@symbol' => $currency->getSymbol()]);
+          }
+          if ($bookableEntity->hasField('field_rate_in_person') && !$bookableEntity->field_rate_in_person->isEmpty()) {
+            $inperson_rate = $bookableEntity->get('field_rate_in_person')->getValue();
+            $currency = $currency_repository->get($inperson_rate[0]['currency_code']);
+            $formatted_price = $this->bookingService->getRealPrice(number_format($inperson_rate[0]['number'], 0, ',', '.'));
+            $consulting_types['in_person'] = $this->t('In person at @price @symbol', ['@price' => $formatted_price, '@symbol' => $currency->getSymbol()]);
+          }
+
+          $form['consulting_type'] = [
+            '#type' => 'select',
+            '#title' => $this->t('Consulting type'),
+            '#options' => $consulting_types,
+            '#empty_option' => $this->t('- Select an option -'),
+            '#required' => TRUE,
+          ];
+
+          if (count($consulting_types) == 1) {
+            $form['consulting_type']['#default_value'] = array_key_first($consulting_types);
+            $form['consulting_type']['#attributes']['disabled'] = 'disabled';
+          }
           /*$form['first_name'] = [
             '#type' => 'textfield',
             '#title' => $this->t('First Name'),
@@ -375,7 +405,13 @@ class BookingForm extends FormBase {
 
     $start_date = new \DateTime($values['date'] . ' ' . $values['time']);
 
-    if ($this->addToCart($bookable_entity, $start_date, $duration, $values)) {
+    if ($values['consulting_type'] == 'online') {
+      $rate = $bookable_entity->get('field_rate_online')->getValue();
+    }
+    if ($values['consulting_type'] == 'in_person') {
+      $rate = $bookable_entity->get('field_rate_in_person')->getValue();
+    }
+    if ($this->addToCart($bookable_entity, $start_date, $duration, $rate, $values)) {
       $form_state->setRedirect('commerce_cart.page');
     }
   }
@@ -383,7 +419,7 @@ class BookingForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function addToCart($bookable_entity, $start_date, $duration, $values = []) {
+  public function addToCart($bookable_entity, $start_date, $duration, $rate, $values = []) {
     // @todo: Load the real product.
     $product = Product::load(1);
   
@@ -418,8 +454,8 @@ class BookingForm extends FormBase {
       $order_item->set('field_notes', $values['note']);
     }
 
-    $price_field = $bookable_entity->get('field_rate')->first();
-    $price_number = $price_field->getValue()['number'];
+    // Price with platform percentage.
+    $price_number = $this->bookingService->getRealPrice($rate[0]['number']);
 
     $consulting_price = $variation->getPrice()->multiply($price_number);
     $order_item->set('field_consulting_price', $consulting_price);

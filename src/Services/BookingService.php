@@ -267,5 +267,23 @@ private function areTimePeriodsOverlapping($start1, $end1, $start2, $end2) {
     // Ritorna l'array di opzioni di tempo disponibili.
     return $time_options;
   }
+
+  /**
+   * Controlla se l'utente è disponibile.
+   *
+   * @param int $rate
+   *   The rate set by the user
+   *
+   * @return int $real_rate
+   *   The rounded rate with the platform percentage
+   */
+  public function getRealPrice($price) {
+    $settings = \Drupal::state()->get('bo_system.settings');
+
+    if ($settings['percentage'] > 0) {
+      $price = $price + ($price * $settings['percentage'] / 100);
+    }
+    return round($price);
+  }
   
 }
