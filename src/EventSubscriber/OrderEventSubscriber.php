@@ -128,6 +128,9 @@ class OrderEventSubscriber implements EventSubscriberInterface, DestructableInte
     if ($item->hasField('field_notes') && !$item->field_notes->isEmpty()) {
       $data['field_notes'] = $item->get('field_notes')->getValue();
     }
+    if ($item->hasField('field_consulting_type') && !$item->field_consulting_type->isEmpty()) {
+      $data['field_consulting_type'] = $item->get('field_consulting_type')->getValue();
+    }
     
 
     $title = '';
@@ -151,7 +154,10 @@ class OrderEventSubscriber implements EventSubscriberInterface, DestructableInte
       'field_state' => 'confirmed',
     ];
     $node = Node::create($node_values);
-    
+
+    if ($data['field_consulting_type']) {
+      $node->set('field_event_type', $data['field_consulting_type']);
+    }
     // Formattiamo le date per Smart Date.
     $consulting_date = $data['field_consulting_date'][0]['value'];
     $duration =  $data['field_consulting_duration'][0]['value'] ?? 60;

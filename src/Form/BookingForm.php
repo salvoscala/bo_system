@@ -449,6 +449,12 @@ class BookingForm extends FormBase {
     $order_item->set('field_consulting_date', $start_date->format('Y-m-d\TH:i:s'));
     $order_item->set('field_consulting_duration', $duration);
     $order_item->set('field_bookable_entity', $bookable_entity->id());
+    $order_item->set('field_consulting_type', $bookable_entity->id());
+    if (isset($values['consulting_type']) && $values['consulting_type']) {
+      if ($order_item->hasField('field_consulting_type')) {
+        $order_item->set('field_consulting_type', $values['consulting_type']);
+      }
+    }
     // @TODO: Ci serve un campo per il wrapper?
     if (isset($values['note'])) {
       $order_item->set('field_notes', $values['note']);
