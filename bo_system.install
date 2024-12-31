@@ -150,3 +150,61 @@ function _bo_system_import_optional_views() {
   UpgradeConfig::updateConfigs($configsToUpdate);
 
 */
+
+
+
+/**
+ * Add services.
+ */
+function bo_system_update_10001() {
+
+  $configsToUpdate = [
+    'bo_system' => [
+      'paragraphs.paragraphs_type.service',
+      'taxonomy.vocabulary.service'
+    ],
+  ];
+  UpgradeConfig::updateConfigs($configsToUpdate);
+
+
+  $configsForCreateFields = [
+    'bo_system' => [
+      [
+        'config' => 'field.field.paragraph.service.field_percentage',
+        'storage' => 'field.storage.paragraph.field_percentage',
+      ],
+      [
+        'config' => 'field.field.node.event.field_services',
+        'storage' => 'field.storage.node.field_services',
+      ],
+      [
+        'config' => 'field.field.node.bookable_entity.field_services',
+        'storage' => 'field.storage.node.field_services',
+      ],
+      [
+        'config' => 'field.field.commerce_order_item.booking.field_services',
+        'storage' => 'field.storage.commerce_order_item.field_services',
+      ],
+      [
+        'config' => 'field.field.paragraph.service.field_service',
+        'storage' => 'field.storage.paragraph.field_service',
+      ],
+    ],
+  ];
+  UpgradeConfig::createNewFields($configsForCreateFields);
+
+
+  $configsToUpdate = [
+    'bo_system' => [
+      'core.entity_view_display.paragraph.service.default',
+      'core.entity_form_display.paragraph.service.default',
+      'core.entity_view_display.commerce_order_item.booking.default',
+      'core.entity_form_display.commerce_order_item.booking.default',
+      'core.entity_form_display.commerce_order_item.booking.add_to_cart',
+      'core.entity_form_display.node.bookable_entity.default',
+      'core.entity_form_display.node.event.default',
+    ],
+  ];
+  UpgradeConfig::updateConfigs($configsToUpdate);
+
+}

@@ -8,9 +8,13 @@ dependencies:
     - field.field.commerce_order_item.booking.field_consulting_date
     - field.field.commerce_order_item.booking.field_consulting_duration
     - field.field.commerce_order_item.booking.field_consulting_price
+    - field.field.commerce_order_item.booking.field_consulting_type
     - field.field.commerce_order_item.booking.field_notes
+    - field.field.commerce_order_item.booking.field_services
   module:
     - commerce_order
+_core:
+  default_config_hash: AX9hcbtegCwXeC8F2vuyDYVu4jn7-SUbfL3eJGVTFME
 id: commerce_order_item.booking.add_to_cart
 targetEntityType: commerce_order_item
 bundle: booking
@@ -41,6 +45,8 @@ hidden:
   field_consulting_date: true
   field_consulting_duration: true
   field_consulting_price: true
+  field_consulting_type: true
   field_notes: true
+  field_services: true
   total_price: true
   unit_price: true

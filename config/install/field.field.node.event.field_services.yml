@@ -1,0 +1,45 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_services
+    - node.type.event
+    - paragraphs.paragraphs_type.service
+  module:
+    - entity_reference_revisions
+id: node.event.field_services
+field_name: field_services
+entity_type: node
+bundle: event
+label: Services
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:paragraph'
+  handler_settings:
+    target_bundles:
+      service: service
+    negate: 0
+    target_bundles_drag_drop:
+      2_text:
+        weight: 8
+        enabled: false
+      carousel:
+        weight: 9
+        enabled: false
+      service:
+        weight: 7
+        enabled: true
+      text:
+        weight: 10
+        enabled: false
+      text_and_image:
+        weight: 11
+        enabled: false
+      vertical_carousel:
+        weight: 12
+        enabled: false
+field_type: entity_reference_revisions

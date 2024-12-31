@@ -1,0 +1,8 @@
+langcode: en
+status: true
+dependencies: {  }
+name: Service
+vid: service
+description: 'Extra service'
+weight: 0
+new_revision: false

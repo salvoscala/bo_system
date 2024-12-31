@@ -313,6 +313,10 @@ class BookingForm extends FormBase {
             '#options' => $consulting_types,
             '#empty_option' => $this->t('- Select an option -'),
             '#required' => TRUE,
+            '#ajax' => [
+              'callback' => [get_class($this), 'ajaxRefresh'],
+              'wrapper' => 'booking-form',
+            ],
           ];
 
           if (count($consulting_types) == 1) {
@@ -353,12 +357,44 @@ class BookingForm extends FormBase {
             $form['time']['#disabled'] = FALSE;
           }
 
-          $form['submit'] = [
-            '#type' => 'submit',
-            '#value' => $this->t('Book now'),
-            '#attributes' => ['class' => ['btn-primary']],
-            '#disabled' => TRUE,
+          $service_options = [];
+          if ($bookableEntity->hasField('field_services') && !$bookableEntity->field_services->isEmpty()) {
+            foreach ($bookableEntity->field_services->referencedEntities() as $service_item) {
+              $service_name = $service_item->get('field_service')->entity->label();
+              $service_percentage = $service_item->get('field_percentage')->value;
+              $service_options[$service_item->id()] = $service_name . ' (' . $service_percentage . '%)';
+            }
+          }
+
+          $form['services'] = [
+            '#type' => 'select',
+            '#title' => $this->t('Additional Services'),
+            '#options' => $service_options,
+            '#empty_option' => $this->t('- Select additional services -'),
+            '#ajax' => [
+              'callback' => [get_class($this), 'ajaxRefresh'],
+              'wrapper' => 'booking-form',
+            ],
           ];
+
+          $total_price = $this->getTotalPrice($form_state);
+          
+          if ($total_price) {
+            $form['submit'] = [
+              '#type' => 'submit',
+              '#value' => $this->t('Book from @price @symbol', ['@price' => number_format($total_price, 0, ',', '.'), '@symbol' => $currency->getSymbol()]),
+              '#attributes' => ['class' => ['btn-primary']],
+              '#disabled' => TRUE,
+            ];
+          }
+          else {
+            $form['submit'] = [
+              '#type' => 'submit',
+              '#value' => $this->t('Book now'),
+              '#attributes' => ['class' => ['btn-primary']],
+              '#disabled' => TRUE,
+            ];
+          }
 
           if (!empty($form_state->getValue('date')) && !empty($form_state->getValue('time'))) {
             $form['submit']['#disabled'] = FALSE;
@@ -388,6 +424,36 @@ class BookingForm extends FormBase {
   /**
    * {@inheritdoc}
    */
+  public function getTotalPrice(FormStateInterface $form_state) {
+    $values = $form_state->getValues();
+
+    if ($values['bookable_entity']) {
+      $bookable_entity = Node::load($values['bookable_entity']);
+      if ($values['consulting_type'] == 'online') {
+        $rate_value = $bookable_entity->get('field_rate_online')->getValue();
+        $rate = $rate_value[0]['number'];
+      }
+      if ($values['consulting_type'] == 'in_person') {
+        $rate_value = $bookable_entity->get('field_rate_in_person')->getValue();
+        $rate = $rate_value[0]['number'];
+      }
+      if ($values['services']) {
+        $service_paragraph = $this->entityTypeManager->getStorage('paragraph')->load($values['services']);
+        if ($service_paragraph) {
+          $percentage = $service_paragraph->get('field_percentage')->value;
+          $rate += ($rate * ($percentage / 100));
+        }
+      }
+
+      $price_number = $this->bookingService->getRealPrice($rate);
+      return $price_number;
+    }
+    return 0;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function submitForm(array &$form, FormStateInterface $form_state) {
 
     $values = $form_state->getValues();
@@ -405,12 +471,7 @@ class BookingForm extends FormBase {
 
     $start_date = new \DateTime($values['date'] . ' ' . $values['time']);
 
-    if ($values['consulting_type'] == 'online') {
-      $rate = $bookable_entity->get('field_rate_online')->getValue();
-    }
-    if ($values['consulting_type'] == 'in_person') {
-      $rate = $bookable_entity->get('field_rate_in_person')->getValue();
-    }
+    $rate = $this->getTotalPrice($form_state);
     if ($this->addToCart($bookable_entity, $start_date, $duration, $rate, $values)) {
       $form_state->setRedirect('commerce_cart.page');
     }
@@ -419,7 +480,7 @@ class BookingForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function addToCart($bookable_entity, $start_date, $duration, $rate, $values = []) {
+  public function addToCart($bookable_entity, $start_date, $duration, $price_number, $values = []) {
     // @todo: Load the real product.
     $product = Product::load(1);
   
@@ -444,7 +505,6 @@ class BookingForm extends FormBase {
       'unit_price' => $variation->getPrice(),
     ]);
 
-
     // Aggiungiamo all'item le informazioni.
     $order_item->set('field_consulting_date', $start_date->format('Y-m-d\TH:i:s'));
     $order_item->set('field_consulting_duration', $duration);
@@ -455,13 +515,30 @@ class BookingForm extends FormBase {
         $order_item->set('field_consulting_type', $values['consulting_type']);
       }
     }
+
+    // Settiamo i servizi se ci sono.
+    if (isset($values['services']) && $values['services']) {
+      if (is_array($values['services'])) {
+        $services = $values['services'];
+      }
+      else {
+        $services[] = $values['services'];
+      }
+      foreach ($services as $item) {
+        $service_paragraph = $this->entityTypeManager->getStorage('paragraph')->load($item);
+        if ($service_paragraph) {
+          $cloned_paragraph = $service_paragraph->createDuplicate();
+          $cloned_paragraph->save();
+          dpm($cloned_paragraph, 'cloned_paragraph');
+          $order_item->get('field_services')->appendItem($cloned_paragraph);
+        }
+      }
+    }
+
     // @TODO: Ci serve un campo per il wrapper?
     if (isset($values['note'])) {
       $order_item->set('field_notes', $values['note']);
     }
-
-    // Price with platform percentage.
-    $price_number = $this->bookingService->getRealPrice($rate[0]['number']);
 
     $consulting_price = $variation->getPrice()->multiply($price_number);
     $order_item->set('field_consulting_price', $consulting_price);

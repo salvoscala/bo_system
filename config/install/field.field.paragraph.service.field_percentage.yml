@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_percentage
+    - paragraphs.paragraphs_type.service
+id: paragraph.service.field_percentage
+field_name: field_percentage
+entity_type: paragraph
+bundle: service
+label: Percentage
+description: 'The percentage that will be added to the overall price'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: '%'
+field_type: decimal

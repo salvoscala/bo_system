@@ -7,10 +7,16 @@ dependencies:
     - field.field.commerce_order_item.booking.field_consulting_date
     - field.field.commerce_order_item.booking.field_consulting_duration
     - field.field.commerce_order_item.booking.field_consulting_price
+    - field.field.commerce_order_item.booking.field_consulting_type
     - field.field.commerce_order_item.booking.field_notes
+    - field.field.commerce_order_item.booking.field_services
   module:
     - commerce_price
     - datetime
+    - entity_reference_revisions
+    - options
+_core:
+  default_config_hash: aFY8PCK0Sf0x6LwkBw7l0JgIFSOFx8r8ZSwpFvXZpLg
 id: commerce_order_item.booking.default
 targetEntityType: commerce_order_item
 bundle: booking
@@ -70,12 +76,28 @@ content:
     third_party_settings: {  }
     weight: 1
     region: content
+  field_consulting_type:
+    type: list_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 8
+    region: content
   field_notes:
     type: basic_string
     label: above
     settings: {  }
     third_party_settings: {  }
     weight: 5
+    region: content
+  field_services:
+    type: entity_reference_revisions_entity_view
+    label: above
+    settings:
+      view_mode: default
+      link: ''
+    third_party_settings: {  }
+    weight: 10
     region: content
 hidden:
   adjustments: true

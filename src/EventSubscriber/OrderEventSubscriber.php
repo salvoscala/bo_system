@@ -131,7 +131,9 @@ class OrderEventSubscriber implements EventSubscriberInterface, DestructableInte
     if ($item->hasField('field_consulting_type') && !$item->field_consulting_type->isEmpty()) {
       $data['field_consulting_type'] = $item->get('field_consulting_type')->getValue();
     }
-    
+    if ($item->hasField('field_services') && !$item->field_services->isEmpty()) {
+      $data['field_services'] = $item->get('field_services')->referencedEntities();
+    }
 
     $title = '';
     if ($data['field_bookable_entity'][0]['target_id']) {
@@ -158,6 +160,18 @@ class OrderEventSubscriber implements EventSubscriberInterface, DestructableInte
     if ($data['field_consulting_type']) {
       $node->set('field_event_type', $data['field_consulting_type']);
     }
+
+     // Settiamo i servizi se ci sono.
+     if (isset($data['field_services']) && $data['field_services']) {
+      foreach ($data['field_services'] as $service_paragraph) {
+        if ($service_paragraph) {
+          $cloned_paragraph = $service_paragraph->createDuplicate();
+          $cloned_paragraph->save();
+          $node->get('field_services')->appendItem($cloned_paragraph);
+        }
+      }
+    }
+
     // Formattiamo le date per Smart Date.
     $consulting_date = $data['field_consulting_date'][0]['value'];
     $duration =  $data['field_consulting_duration'][0]['value'] ?? 60;

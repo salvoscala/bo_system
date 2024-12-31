@@ -201,6 +201,8 @@ function bo_system_entity_presave(EntityInterface $entity) {
         $rate = $in_person;
       }
 
+      // Questo setta solamente un rate come "starting from".
+      // Ha solo lo scopo di avere un prezzo base.
       $rate = $bookingService->getRealPrice($rate);
       $rate_price = new Price(round($rate), $currency);
       $entity->set('field_rate', $rate_price);
