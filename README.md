@@ -2,6 +2,11 @@
 2. Create a product of type Booking and a variation with price 1
 3. Create a content type as "Wrapper" (Guide, Office) with a required field field_bookable_entity (reference to Bookable entity content).
 4. In /admin/config/people/accounts/form-display enable field "First name" and "Last name".
+5. Settings can be found here: /admin/config/bo-settings
+   Full discount (for offline payments) and Discount (for "in-person" events paied online) are managed with 2 Commerce Promotions created on installation.
+   There are 2 custom conditions that automatically applies promotions.
+
+
 
 // TEST:
 

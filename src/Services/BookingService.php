@@ -280,8 +280,8 @@ private function areTimePeriodsOverlapping($start1, $end1, $start2, $end2) {
   public function getRealPrice($price) {
     $settings = \Drupal::state()->get('bo_system.settings');
 
-    if ($settings['percentage'] > 0) {
-      $price = $price + ($price * $settings['percentage'] / 100);
+    if ($settings['platform_percentage'] > 0) {
+      $price = $price + ($price * $settings['platform_percentage'] / 100);
     }
     return round($price);
   }

@@ -1,6 +1,7 @@
 <?php
 
 use Drupal\bo_system\Upgrader\UpgradeConfig;
+use Drupal\commerce_promotion\Entity\Promotion;
 
 /**
  * Implements hook_install().
@@ -73,6 +74,8 @@ function bo_system_install() {
     ->save();
 
     _bo_system_import_optional_views();
+
+    _create_bo_promotions();
     
 }
 
@@ -151,7 +154,59 @@ function _bo_system_import_optional_views() {
 
 */
 
+function _create_bo_promotions() {
+  // Creazione della promozione DISCOUNT.
+  $promotion = Promotion::create([
+    'name' => 'Pay online discount',
+    'display_name' => 'Pay online discount',
+    'status' => TRUE, // Attiva la promozione.
+    'offer' => [
+      'target_plugin_id' => 'order_percentage_off', // Tipo di sconto.
+      'target_plugin_configuration' => [
+        'percentage' => '0.1', // Sconto del 10%.
+      ],
+    ],
+    'order_types' => [
+      ['target_id' => 'booking'], // Applica la promozione solo agli ordini di tipo "booking".
+    ],
+    'conditions' => [
+      [
+        'target_plugin_id' => 'bo_inperson_online_payment_discount', // Plugin condizione personalizzato.
+        'target_plugin_configuration' => [],
+      ],
+    ],
+    'condition_operator' => 'AND', // Operatore per combinare le condizioni.
+  ]);
 
+  // Salva la promozione.
+  $promotion->save();
+
+  // Creazione della promozione DISCOUNT.
+  $promotion = Promotion::create([
+    'name' => 'Full discount',
+    'display_name' => 'Full discount',
+    'status' => TRUE, // Attiva la promozione.
+    'offer' => [
+      'target_plugin_id' => 'order_percentage_off', // Tipo di sconto.
+      'target_plugin_configuration' => [
+        'percentage' => '1', // Sconto del 100%.
+      ],
+    ],
+    'order_types' => [
+      ['target_id' => 'booking'], // Applica la promozione solo agli ordini di tipo "booking".
+    ],
+    'conditions' => [
+      [
+        'target_plugin_id' => 'bo_free_checkout', // Plugin condizione personalizzato.
+        'target_plugin_configuration' => [],
+      ],
+    ],
+    'condition_operator' => 'AND', // Operatore per combinare le condizioni.
+  ]);
+
+  // Salva la promozione.
+  $promotion->save();
+}
 
 /**
  * Add services.
@@ -207,4 +262,25 @@ function bo_system_update_10001() {
   ];
   UpgradeConfig::updateConfigs($configsToUpdate);
 
+}
+
+
+/**
+ * Add promotions for Full discount.
+ */
+function bo_system_update_10002() {
+  $configsForCreateFields = [
+    'bo_system' => [
+      [
+        'config' => 'field.field.commerce_order_item.booking.field_promotion',
+        'storage' => 'field.storage.commerce_order_item.field_promotion',
+      ],
+    ],
+  ];
+  UpgradeConfig::createNewFields($configsForCreateFields);
+
+
+
+  \Drupal::service('module_installer')->install(['commerce_promotion']);
+  _create_bo_promotions();
 }

@@ -166,7 +166,7 @@ function bo_system_entity_presave(EntityInterface $entity) {
         }
 
         $unit_price = new Price($price, $currency);
-        $entity->setUnitPrice($unit_price);
+        $entity->setUnitPrice($unit_price, TRUE);
       }
     }
   }

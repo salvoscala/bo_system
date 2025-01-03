@@ -177,6 +177,12 @@ class BookingForm extends FormBase {
             '#value' => $bookableEntity->id(),
           ];
 
+          $total_price = $this->getTotalPrice($form_state);
+          $form['rate'] = [
+            '#type' => 'hidden',
+            '#value' => $total_price,
+          ];
+
           $disabled_week_days = array_combine(range(1, 7), range(1, 7));
           foreach ($open_hours as $open_day) {
             unset($disabled_week_days[$open_day['day']]);
@@ -377,17 +383,92 @@ class BookingForm extends FormBase {
             ],
           ];
 
-          $total_price = $this->getTotalPrice($form_state);
-          
+          $discount = 0;
+          $settings = \Drupal::state()->get('bo_system.settings');
+
+          // Abbiamo diversi tipi di Submit:
+          // Caso 1: Evento online -> pagamento totale online.
+          // Caso 2: Evento in presenza -> pagamento online disabilitato (checkout a 0).
+          // Caso 3: Evento in presenza -> pagamento online (senza sconto).
+          // Caso 4: Evento in presenza -> pagamento online con sconto (2 bottoni)
+
+          $consulting_type = '';
+          if ($form_state->getValue('consulting_type')) {
+            $consulting_type = $form_state->getValue('consulting_type');
+          }
+          $inperson_online_payment = $settings['inperson_online_payment'] ?? FALSE;
+          $inperson_online_payment_discount = $settings['inperson_online_payment_discount'] ?? 0;
+
           if ($total_price) {
-            $form['submit'] = [
-              '#type' => 'submit',
-              '#value' => $this->t('Book from @price @symbol', ['@price' => number_format($total_price, 0, ',', '.'), '@symbol' => $currency->getSymbol()]),
-              '#attributes' => ['class' => ['btn-primary']],
-              '#disabled' => TRUE,
-            ];
+            // Caso 1. Evento online -> Pagamento completo.
+            if ($consulting_type == 'online') {
+              $form['submit_pay_now'] = [
+                '#type' => 'submit',
+                '#value' => $this->t('Book now at @price €', [
+                  '@price' => number_format($total_price - $discount, 2, ',', '.'),
+                ]),
+                '#attributes' => ['class' => ['btn-success']],
+                '#submit' => [[$this, 'submitPayTotalNow']],
+              ];
+            }
+
+            if ($consulting_type == 'in_person') {
+
+              // Caso 2. Evento in presenza e pagamento online disabilitato (checkout a 0).
+              if (!$inperson_online_payment) {
+
+                $form['submit_pay_later'] = [
+                  '#type' => 'submit',
+                  '#value' => $this->t('Book now and pay later at @price €', [
+                    '@price' => number_format($total_price - $discount, 2, ',', '.'),
+                  ]),
+                  '#attributes' => ['class' => ['btn-success']],
+                  '#submit' => [[$this, 'submitPayLater']],
+                ];
+              }
+              else {
+                if (!$inperson_online_payment_discount) {
+                  // Caso 3: Evento in presenza -> pagamento online (senza sconto).
+                  // In questo caso si paga tutto online ( non e' possibile pagare in struttura ).
+                  $form['submit_pay_now'] = [
+                    '#type' => 'submit',
+                    '#value' => $this->t('Book now at @price €', [
+                      '@price' => number_format($total_price - $discount, 2, ',', '.'),
+                    ]),
+                    '#attributes' => ['class' => ['btn-success']],
+                    '#submit' => [[$this, 'submitPayTotalNow']],
+                  ];
+                }
+                else {
+                  // Caso 4. Evento in presenza -> pagamento online con sconto.
+                  // In questo caso abbiamo 2 bottoni: uno per pagare online con lo sconto
+                  // e uno per pagare in struttura il totale.
+                  $discount = $total_price * ($inperson_online_payment_discount / 100);
+                  //$form['rate']['#value'] = $total_price - $discount;
+                  $form['submit_pay_now'] = [
+                    '#type' => 'submit',
+                    '#value' => $this->t('Pay now at @price €', [
+                      '@price' => number_format($total_price - $discount, 2, ',', '.'),
+                    ]),
+                    '#attributes' => ['class' => ['btn-success']],
+                    '#submit' => [[$this, 'submitPayDiscountedNow']],
+                  ];
+      
+                  $form['submit_pay_later'] = [
+                    '#type' => 'submit',
+                    '#value' => $this->t('Pay later at @price €', [
+                      '@price' => number_format($total_price, 2, ',', '.'),
+                    ]),
+                    '#attributes' => ['class' => ['btn-primary']],
+                    '#submit' => [[$this, 'submitPayLater']],
+                  ];
+    
+                }
+              }
+            }
           }
           else {
+            // Caso del form disabilitato, come al caricamento del form.
             $form['submit'] = [
               '#type' => 'submit',
               '#value' => $this->t('Book now'),
@@ -417,8 +498,42 @@ class BookingForm extends FormBase {
   }
 
   public static function ajaxRefresh(array $form, FormStateInterface $form_state) {
-
     return $form;
+  }
+
+  public function submitPayDiscountedNow(array &$form, FormStateInterface $form_state) {
+    $this->processPayment($form_state, TRUE);
+  }
+
+  public function submitPayTotalNow(array &$form, FormStateInterface $form_state) {
+    $this->processPayment($form_state, FALSE);
+  }
+  
+  public function submitPayLater(array &$form, FormStateInterface $form_state) {
+    $this->processPayment($form_state, FALSE, TRUE);
+  }
+
+  /**
+   * Process payment logic based on discount.
+   */
+  protected function processPayment(FormStateInterface $form_state, $apply_online_discount, $free_checkout = FALSE) {
+    $values = $form_state->getValues();
+
+    $bookable_entity = Node::load($values['bookable_entity']);
+    $rate = $values['rate'] ?? NULL;
+
+    if ($apply_online_discount) {
+      $promotion_to_apply = 'inperson_online_payment_discount';
+    }
+
+    if ($free_checkout) {
+      $promotion_to_apply = 'free_checkout';
+    }
+
+    $this->addToCart($bookable_entity, new \DateTime($values['date'] . ' ' . $values['time']), 60, $rate, $values, $promotion_to_apply);
+
+    $this->messenger()->addMessage($this->t('Your booking has been processed.'));
+    $form_state->setRedirect('commerce_cart.page');
   }
 
   /**
@@ -471,7 +586,8 @@ class BookingForm extends FormBase {
 
     $start_date = new \DateTime($values['date'] . ' ' . $values['time']);
 
-    $rate = $this->getTotalPrice($form_state);
+    //$rate = $this->getTotalPrice($form_state);
+    $rate = $values['rate'] ?? NULL;
     if ($this->addToCart($bookable_entity, $start_date, $duration, $rate, $values)) {
       $form_state->setRedirect('commerce_cart.page');
     }
@@ -480,7 +596,7 @@ class BookingForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function addToCart($bookable_entity, $start_date, $duration, $price_number, $values = []) {
+  public function addToCart($bookable_entity, $start_date, $duration, $price_number, $values = [], $promotion_to_apply = '') {
     // @todo: Load the real product.
     $product = Product::load(1);
   
@@ -529,7 +645,6 @@ class BookingForm extends FormBase {
         if ($service_paragraph) {
           $cloned_paragraph = $service_paragraph->createDuplicate();
           $cloned_paragraph->save();
-          dpm($cloned_paragraph, 'cloned_paragraph');
           $order_item->get('field_services')->appendItem($cloned_paragraph);
         }
       }
@@ -538,6 +653,13 @@ class BookingForm extends FormBase {
     // @TODO: Ci serve un campo per il wrapper?
     if (isset($values['note'])) {
       $order_item->set('field_notes', $values['note']);
+    }
+
+    if ($promotion_to_apply) {
+      // Settiamo il nome della promozione.
+      // Queste verra' automaticamente applicata grazie alle nostre
+      // condizionio custom.
+      $order_item->set('field_promotion', $promotion_to_apply);
     }
 
     $consulting_price = $variation->getPrice()->multiply($price_number);
