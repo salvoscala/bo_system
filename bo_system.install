@@ -90,6 +90,7 @@ function _bo_system_import_optional_views() {
 
   $configs[] = 'views.view.booking_events_manage';
   $configs[] = 'views.view.bookings';
+  $configs[] = 'views.view.change_booking_details';
 
   foreach ($configs as $config) {
 
@@ -264,7 +265,6 @@ function bo_system_update_10001() {
 
 }
 
-
 /**
  * Add promotions for Full discount.
  */
@@ -283,4 +283,12 @@ function bo_system_update_10002() {
 
   \Drupal::service('module_installer')->install(['commerce_promotion']);
   _create_bo_promotions();
+}
+
+/**
+ * Update views
+ */
+function bo_system_update_10003() {
+  _bo_system_import_optional_views();
+
 }

@@ -370,18 +370,18 @@ class BookingForm extends FormBase {
               $service_percentage = $service_item->get('field_percentage')->value;
               $service_options[$service_item->id()] = $service_name . ' (' . $service_percentage . '%)';
             }
-          }
 
-          $form['services'] = [
-            '#type' => 'select',
-            '#title' => $this->t('Additional Services'),
-            '#options' => $service_options,
-            '#empty_option' => $this->t('- Select additional services -'),
-            '#ajax' => [
-              'callback' => [get_class($this), 'ajaxRefresh'],
-              'wrapper' => 'booking-form',
-            ],
-          ];
+            $form['services'] = [
+              '#type' => 'select',
+              '#title' => $this->t('Additional Services'),
+              '#options' => $service_options,
+              '#empty_option' => $this->t('- Select additional services -'),
+              '#ajax' => [
+                'callback' => [get_class($this), 'ajaxRefresh'],
+                'wrapper' => 'booking-form',
+              ],
+            ];
+          }
 
           $discount = 0;
           $settings = \Drupal::state()->get('bo_system.settings');
@@ -581,8 +581,10 @@ class BookingForm extends FormBase {
       return;
     }
 
-    // @todo: Load the real duration.
     $duration = 60;
+    if ($bookable_entity->hasField('field_consulting_duration') && !$bookable_entity->field_consulting_duration->isEmpty()) {
+      $duration = $bookable_entity->get('field_consulting_duration')->value ?? 60;
+    }
 
     $start_date = new \DateTime($values['date'] . ' ' . $values['time']);
 
@@ -599,7 +601,6 @@ class BookingForm extends FormBase {
   public function addToCart($bookable_entity, $start_date, $duration, $price_number, $values = [], $promotion_to_apply = '') {
     // @todo: Load the real product.
     $product = Product::load(1);
-  
     $product_variation_id = $product->get('variations')
       ->getValue()[0]['target_id'];
     $storeId = $product->get('stores')->getValue()[0]['target_id'];
@@ -612,6 +613,9 @@ class BookingForm extends FormBase {
   
     if (!$cart) {
      $cart = $this->cartProvider->createCart('booking', $store);
+    }
+    else {
+      $this->cartManager->emptyCart($cart);
     }
 
     $order_item = $this->entityTypeManager->getStorage('commerce_order_item')->create([

@@ -14,7 +14,7 @@ use Drupal\Core\Url;
 use Drupal\Core\Render\Markup;
 use Drupal\user\Entity\User;
 
-class HostCancelBookingForm extends FormBase {
+class HostRequestChange extends FormBase {
 
   /**
    * The current user.
@@ -68,7 +68,7 @@ class HostCancelBookingForm extends FormBase {
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'host_cancel_booking_form';
+    return 'host_request_change_form';
   }
 
   /**
@@ -156,17 +156,17 @@ class HostCancelBookingForm extends FormBase {
     // Campo motivazione.
     $form['notes'] = [
       '#type' => 'textarea',
-      '#title' => $this->t('Add some notes. This information will be sent to customer via mail.'),
-      '#required' => TRUE,
+      '#title' => $this->t('You are going to send a request to modify this event. Do you want to add some additional informations about this? This message will be sent to customer via mail.'),
+      '#required' => FALSE,
     ];
 
     // Pulsanti di submit e cancel.
     $form['actions']['#type'] = 'actions';
     $form['actions']['submit'] = [
       '#type' => 'submit',
-      '#value' => $this->t('Delete event'),
+      '#value' => $this->t('Request a change'),
       '#attributes' => [
-        'class' => ['btn', 'btn-danger']
+        'class' => ['btn', 'btn-warning']
       ]
     ];
 
@@ -181,41 +181,34 @@ class HostCancelBookingForm extends FormBase {
     $node = $this->routeMatch->getParameter('node');
 
     // Esegui la logica di cancellazione dell'evento.
-    $node->set('field_state', 'cancelled_by_host'); // Imposta lo stato su "cancelled_by_host".
     $notes = $form_state->getValue('notes');
-    \Drupal::logger('italia_locals')->notice('Event @title cancelled: @notes', [
-      '@title' => $node->label(),
+    \Drupal::logger('italia_locals')->notice('Requested modification for event @title cancelled: @notes', [
+      '@title' => $node->label() . ' - ' . $node->id(),
       '@notes' => $notes,
     ]);
-    $node->set('field_cancellation_notes', $notes);
-    $node->save();
 
     // Messaggio di conferma e redirect.
-    $this->messenger()->addStatus($this->t('The event has been cancelled with success.'));
-
+    $this->messenger()->addStatus($this->t('A request has been sent with success. Customer will be notified and will be able to change the date'));
 
     // Inviamo delle mail.
-    $url = Url::fromRoute('entity.node.canonical', ['node' => $node->id()], ['absolute' => TRUE])->toString();
+    $url = Url::fromRoute('bo_system.change_booking_form', ['node' => $node->id()], ['absolute' => TRUE])->toString();
 
     // Email Customer.
     $site_mail = \Drupal::config('system.site')->get('mail');
-    $subject = 'Event cancelled by Host';
-    $mail_body = '<p>The event has been cancelled by host.</p>';
+    $subject = 'The host has requested a modification';
+    $mail_body = '<p>The host has requested a modification for this event.</p>';
+    $mail_body = '<p>Please select a new date here: <a href="' . $url . '" target="_blank">' . $url . '</a></p>';
     if ($notes) {
-      $mail_body .= '<p>The host left a cancellation message:</p>';
+      $mail_body .= '<p>The host left a message:</p>';
       $mail_body .= '<p>' . $notes . '</p>';
     }
 
-    $mail_body .= '<p>You may view more <a href="' . $url . '" target="_blank">details here</a></p>';
     $customer_mail = $node->get('field_customer')->entity->getEmail();
     simple_mail_send($site_mail, $customer_mail, $subject, Markup::create($mail_body));
 
     // Email administration for refund.
     $site_mail = \Drupal::config('system.site')->get('mail');
-    $subject = 'Refund needed - Event cancelled by Host';
-    simple_mail_send($site_mail, $site_mail, $subject, Markup::create($mail_body));
-
-    $form_state->setRedirect('entity.node.canonical', ['node' => $node->id()]);
+    $form_state->setRedirect('bo_system.dashboard');
   }
 
 }

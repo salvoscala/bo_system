@@ -12,6 +12,7 @@ use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Render\Markup;
+use Drupal\user\Entity\User;
 
 class CustomerCancelBookingForm extends FormBase {
 
@@ -80,14 +81,15 @@ class CustomerCancelBookingForm extends FormBase {
    *   Restituisce AccessResult::allowed() se l'utente può accedere, altrimenti AccessResult::forbidden().
    */
   public function access(Node $node) {
+    $currentUser = User::load($this->currentUser->id());
     // Se l'utente è amministratore, concedi l'accesso.
-    if ($this->currentUser->hasRole('administrator')) {
+    if ($currentUser->hasRole('administrator') || $currentUser->id() == 1) {
       return AccessResult::allowed();
     }
 
     // Verifica se l'utente è quello referenziato da "field_customer".
     $customer = $node->get('field_customer')->entity;
-    if ($customer && $customer->id() === $this->currentUser->id()) {
+    if ($customer && $customer->id() === $currentUser->id()) {
       return AccessResult::allowed();
     }
 

@@ -22,6 +22,10 @@ function bo_system_theme() {
         'uid' => NULL,
       ],
     ],
+    'bo_system_change_booking' => [
+      'template' => 'bo-system-change-booking',
+      'variables' => [],
+    ]
   ];
 
 }

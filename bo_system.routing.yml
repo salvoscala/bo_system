@@ -21,6 +21,19 @@ bo_system.host_cancel_booking_form:
       node:
         type: 'entity:node'
 
+bo_system.host_request_change:
+  path: '/host-request-change-event/{node}'
+  defaults:
+    _form: '\Drupal\bo_system\Form\HostRequestChange'
+    _title: 'Request event modification'
+  requirements:
+    _custom_access: '\Drupal\bo_system\Form\HostRequestChange::access'
+    _permission: 'access content'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+
 bo_system.customer_cancel_booking_form:
   path: '/customer-delete-event/{node}'
   defaults:
@@ -42,3 +55,15 @@ bo_system.settings:
   requirements:
     _permission: 'administer site configuration'
 
+bo_system.change_booking_form:
+  path: '/event/{node}/edit'
+  defaults:
+    _controller: '\Drupal\bo_system\Controller\ChangeBooking::content'
+    _title: 'Edit Booking'
+  requirements:
+    _custom_access: '\Drupal\bo_system\Form\ChangeBookingForm::access'
+    _permission: 'access content'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
