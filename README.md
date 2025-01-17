@@ -14,3 +14,4 @@
 2. Create a node of type "Bookable entity" and set as author the user created before.
 3. Create a node of type "Wrapper" (it could be Guide, Office...) and relate the bookable entity created before. Relate the owner too.
 4. In the Wrapper node view add the block "bo_system_booking_form". You may do that via Block layout or twig.
+
