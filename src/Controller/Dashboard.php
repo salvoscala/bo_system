@@ -135,6 +135,7 @@ class Dashboard extends ControllerBase {
         // Passa i dati della tabella come variabile al tema Twig.
         return [
           '#theme' => 'bo_system_dashboard_bookable',
+          '#user' => $user,
           '#uid' => $user->id(),
         ];
       }
@@ -143,6 +144,7 @@ class Dashboard extends ControllerBase {
       // Altrimenti, mostra la dashboard dell'utente.
       return [
         '#theme' => 'bo_system_dashboard_user',
+        '#user' => $user,
         '#uid' => $user->id(),
       ];
     }

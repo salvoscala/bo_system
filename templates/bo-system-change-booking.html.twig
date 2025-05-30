@@ -1,8 +1,13 @@
-<div class="row">
-  <div class="col-12 col-sm-3">
+<div class="row mt-5 reschedule-event">
+
+  <div class="col-12 col-sm-5">
+    <h4>{{'Need to reschedule your event?'|t}}</h4>
+    <p>{{'Select a new available date from the calendar and choose a time slot that works best for you.'|t}}</p>
+    <p>{{'Please note that availability is limited — once you confirm, your booking will be updated automatically.'|t}}</p>
+    <hr>
     {{drupal_view('change_booking_details', 'block_1')}}
   </div>
-  <div class="col-12 col-sm-9">
+  <div class="col-12 col-sm-5 offset-sm-1">
     {{ drupal_form('Drupal\\bo_system\\Form\\ChangeBookingForm') }}
   </div>
 </div>

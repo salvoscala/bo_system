@@ -14,12 +14,14 @@ function bo_system_theme() {
       'template' => 'bo-system-dashboard-bookable',
       'variables' => [
         'uid' => NULL,
+        'user' => NULL
       ],
     ],
     'bo_system_dashboard_user' => [
       'template' => 'bo-system-dashboard-user',
       'variables' => [
         'uid' => NULL,
+        'user' => NULL
       ],
     ],
     'bo_system_change_booking' => [
