@@ -4,6 +4,43 @@ use Drupal\bo_system\Upgrader\UpgradeConfig;
 use Drupal\commerce_promotion\Entity\Promotion;
 
 /**
+ * Implementa hook_schema().
+ */
+function bo_system_schema() {
+  $schema['bo_system_events'] = [
+    'description' => 'Traccia eventi per operazioni custom.',
+    'fields' => [
+      'nid' => [
+        'description' => 'ID del nodo evento.',
+        'type' => 'int',
+        'not null' => TRUE,
+      ],
+      'start_date' => [
+        'description' => 'Data inizio evento.',
+        'type' => 'varchar',
+        'length' => 20,
+        'not null' => TRUE,
+      ],
+      'end_date' => [
+        'description' => 'Data fine evento.',
+        'type' => 'varchar',
+        'length' => 20,
+        'not null' => TRUE,
+      ],
+      'review_notification_sent' => [
+        'description' => 'Timestamp invio notifica review (0 se non inviata).',
+        'type' => 'int',
+        'default' => 0,
+        'not null' => TRUE,
+      ],
+    ],
+    'primary key' => ['nid'],
+  ];
+
+  return $schema;
+}
+
+/**
  * Implements hook_install().
  */
 function bo_system_install() {
@@ -290,5 +327,44 @@ function bo_system_update_10002() {
  */
 function bo_system_update_10003() {
   _bo_system_import_optional_views();
-
 }
+
+/**
+ * Crea la tabella bo_system_events se non esiste.
+ */
+function bo_system_update_10004() {
+  $schema = \Drupal::database()->schema();
+
+  if (!$schema->tableExists('bo_system_events')) {
+    $schema->createTable('bo_system_events', [
+      'description' => 'Traccia eventi e stato notifica review.',
+      'fields' => [
+        'nid' => [
+          'description' => 'ID del nodo evento.',
+          'type' => 'int',
+          'not null' => TRUE,
+        ],
+        'start_date' => [
+          'description' => 'Data inizio evento.',
+          'type' => 'varchar',
+          'length' => 20,
+          'not null' => TRUE,
+        ],
+        'end_date' => [
+          'description' => 'Data fine evento.',
+          'type' => 'varchar',
+          'length' => 20,
+          'not null' => TRUE,
+        ],
+        'review_notification_sent' => [
+          'description' => 'Timestamp invio notifica review (0 se non inviata).',
+          'type' => 'int',
+          'default' => 0,
+          'not null' => TRUE,
+        ],
+      ],
+      'primary key' => ['nid'],
+    ]);
+  }
+}
+

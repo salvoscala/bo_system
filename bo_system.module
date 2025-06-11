@@ -146,12 +146,55 @@ function bo_system_form_alter(&$form, FormStateInterface $form_state, $form_id) 
 }
 
 /**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function bo_system_form_user_register_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $form['account']['mail']['#required'] = TRUE;
+}
+
+/**
  * Implements hook_ENTITY_TYPE_presave() for user entities.
  */
 function bo_system_user_presave(EntityInterface $user) {
   if (\Drupal::currentUser()->id() == $user->id()) {
     $timezone = $user->getTimezone() ?? '';
     setcookie("il-user-timezone", $timezone, time()+3600*24*30*6, '/');
+  }
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function bo_system_entity_insert(EntityInterface $entity) {
+  if ($entity->getEntityTypeId() === 'node' && $entity->bundle() === 'event') {
+    $nid = $entity->id();
+    $start = $entity->get('field_when')->value ?? NULL;
+    $end = $entity->get('field_when')->end_value ?? NULL;
+
+    if ($nid && $start && $end) {
+      \Drupal::database()->insert('bo_system_events')
+        ->fields([
+          'nid' => $nid,
+          'start_date' => $start,
+          'end_date' => $end,
+          'review_notification_sent' => 0,
+        ])
+        ->execute();
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function bo_system_entity_delete(EntityInterface $entity) {
+  if ($entity->getEntityTypeId() === 'node' && $entity->bundle() === 'event') {
+    $nid = $entity->id();
+    if ($nid) {
+      \Drupal::database()->delete('bo_system_events')
+        ->condition('nid', $nid)
+        ->execute();
+    }
   }
 }
 
@@ -212,6 +255,41 @@ function bo_system_entity_presave(EntityInterface $entity) {
       $rate = $bookingService->getRealPrice($rate);
       $rate_price = new Price(round($rate), $currency);
       $entity->set('field_rate', $rate_price);
+    }
+
+    if ($entity->bundle() == 'event') {
+      $nid = $entity->id();
+      $start = $entity->get('field_when')->value ?? NULL;
+      $end = $entity->get('field_when')->end_value ?? NULL;
+  
+      if ($nid && $start && $end) {
+        $connection = \Drupal::database();
+        $existing = $connection->select('bo_system_events', 'r')
+          ->fields('r', ['nid'])
+          ->condition('nid', $nid)
+          ->execute()
+          ->fetchField();
+  
+        if ($existing) {
+          $connection->update('bo_system_events')
+            ->fields([
+              'start_date' => $start,
+              'end_date' => $end,
+            ])
+            ->condition('nid', $nid)
+            ->execute();
+        }
+        else {
+          $connection->insert('bo_system_events')
+            ->fields([
+              'nid' => $nid,
+              'start_date' => $start,
+              'end_date' => $end,
+              'review_notification_sent' => 0,
+            ])
+            ->execute();
+        }
+      }
     }
   }
 }
