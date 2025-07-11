@@ -327,7 +327,7 @@ class BookingForm extends FormBase {
 
           if (count($consulting_types) == 1) {
             $form['consulting_type']['#default_value'] = array_key_first($consulting_types);
-            $form['consulting_type']['#attributes']['disabled'] = 'disabled';
+            //$form['consulting_type']['#attributes']['disabled'] = 'disabled';
           }
           /*$form['first_name'] = [
             '#type' => 'textfield',
@@ -521,7 +521,7 @@ class BookingForm extends FormBase {
 
     $bookable_entity = Node::load($values['bookable_entity']);
     $rate = $values['rate'] ?? NULL;
-
+    $promotion_to_apply = NULL;
     if ($apply_online_discount) {
       $promotion_to_apply = 'inperson_online_payment_discount';
     }
@@ -542,7 +542,7 @@ class BookingForm extends FormBase {
   public function getTotalPrice(FormStateInterface $form_state) {
     $values = $form_state->getValues();
 
-    if ($values['bookable_entity']) {
+    if (isset($values['bookable_entity']) && $values['bookable_entity']) {
       $bookable_entity = Node::load($values['bookable_entity']);
       if ($values['consulting_type'] == 'online') {
         $rate_value = $bookable_entity->get('field_rate_online')->getValue();

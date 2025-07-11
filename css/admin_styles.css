@@ -8,3 +8,7 @@
 .field--type-office-hours  td .form-item.form-datetime-wrapper{
   min-width: 190px;
 }
+
+.field--name-field-open-hours details {
+  overflow-x: scroll;
+}

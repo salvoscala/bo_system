@@ -225,12 +225,16 @@ function bo_system_entity_presave(EntityInterface $entity) {
       // Impostiamo il rate.
       $online = 0;
       $in_person = 0;
+      $has_online_price = FALSE;
+      $has_inperson_price = FALSE;
       $bookingService = \Drupal::service('bo_system.booking_utility');
       if ($entity->hasField('field_rate_online') && !$entity->field_rate_online->isEmpty()) {
         $online = $entity->get('field_rate_online')->getValue()[0]['number'];
+        $has_online_price = TRUE;
       }
       if ($entity->hasField('field_rate_in_person') && !$entity->field_rate_in_person->isEmpty()) {
         $in_person = $entity->get('field_rate_in_person')->getValue()[0]['number'];
+        $has_inperson_price = TRUE;
       }
 
       $currency = 'EUR';
@@ -243,10 +247,18 @@ function bo_system_entity_presave(EntityInterface $entity) {
       }
 
       $rate = 0;
-      if ($online < $in_person) {
+      if ($has_online_price && $has_inperson_price) {
+        if ($online < $in_person) {
+          $rate = $online;
+        }
+        else {
+          $rate = $in_person;
+        }
+      }
+      elseif ($has_online_price) {
         $rate = $online;
       }
-      else {
+      elseif ($has_inperson_price) {
         $rate = $in_person;
       }
 
