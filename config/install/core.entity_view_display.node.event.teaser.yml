@@ -1,3 +1,4 @@
+uuid: af0d0bc3-f70f-4703-855e-cc841e8a70a8
 langcode: en
 status: true
 dependencies:
@@ -7,8 +8,11 @@ dependencies:
     - field.field.node.event.field_bookable_entity
     - field.field.node.event.field_cancellation_notes
     - field.field.node.event.field_customer
+    - field.field.node.event.field_event_link
     - field.field.node.event.field_event_type
     - field.field.node.event.field_order
+    - field.field.node.event.field_review
+    - field.field.node.event.field_services
     - field.field.node.event.field_state
     - field.field.node.event.field_when
     - node.type.event
@@ -53,8 +57,11 @@ hidden:
   field_bookable_entity: true
   field_cancellation_notes: true
   field_customer: true
+  field_event_link: true
   field_event_type: true
   field_order: true
+  field_review: true
+  field_services: true
   field_state: true
   private_message_link: true
   search_api_excerpt: true

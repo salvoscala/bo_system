@@ -113,7 +113,7 @@ function bo_system_install() {
     _bo_system_import_optional_views();
 
     _create_bo_promotions();
-    
+
 }
 
 /**
@@ -137,7 +137,7 @@ function _bo_system_import_optional_views() {
       $config_path = 'modules/contrib/bo_system/config/optional/views.view.booking_events_manage.yml';
       // Importa il file di configurazione della vista.
       $config_data = \Drupal::service('config.storage.sync')->read($config_path);
-      
+
       if (!$config_data) {
         $configsToUpdate = [
           'bo_system/optional' => [
@@ -368,3 +368,30 @@ function bo_system_update_10004() {
   }
 }
 
+/**
+ * Add services.
+ */
+function bo_system_update_10005() {
+
+
+  $configsForCreateFields = [
+    'bo_system' => [
+      [
+        'config' => 'field.field.node.event.field_event_link',
+        'storage' => 'field.storage.node.field_event_link',
+      ],
+    ],
+  ];
+  UpgradeConfig::createNewFields($configsForCreateFields);
+
+
+  $configsToUpdate = [
+    'bo_system' => [
+      'core.entity_form_display.node.event.default',
+      'core.entity_view_display.node.event.default',
+      'core.entity_view_display.node.event.teaser',
+    ],
+  ];
+  UpgradeConfig::updateConfigs($configsToUpdate);
+
+}
