@@ -4,6 +4,9 @@ use Drupal\Core\Render\Markup;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\commerce_price\Price;
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\node\NodeInterface;
 
 /**
  * Implements hook_theme().
@@ -45,7 +48,7 @@ function bo_system_user_insert(\Drupal\user\UserInterface $account) {
   if (isset($_COOKIE['il-user-timezone'])) {
     // Recupera il valore del fuso orario dal cookie.
     $user_timezone = $_COOKIE['il-user-timezone'];
-    
+
     // Verifica che il fuso orario recuperato sia valido.
     if (in_array($user_timezone, timezone_identifiers_list())) {
       // Imposta il fuso orario per l'utente appena creato.
@@ -110,7 +113,7 @@ function bo_system_form_alter(&$form, FormStateInterface $form_state, $form_id) 
         unset($form['footer']);
         unset($form['message']);
         \Drupal::messenger()->addWarning('Impossibile to send a message. Recipient not related.');
-        
+
         return;
       }
 
@@ -120,7 +123,7 @@ function bo_system_form_alter(&$form, FormStateInterface $form_state, $form_id) 
       if ($user->hasField('field_first_name') && $user->hasField('field_last_name')) {
         $recipient_name = $user->get('field_first_name')->value . ' ' . $user->get('field_last_name')->value;
       }
-  
+
       $form['intro'] = [
         '#markup' => Markup::create('<div class="mb-4">Recipient: <strong>' . $recipient_name . '</strong></div>'),
         '#weight' => -100,
@@ -129,7 +132,7 @@ function bo_system_form_alter(&$form, FormStateInterface $form_state, $form_id) 
       $form['members']['#suffix'] = '</div>';
     }
   }
-  
+
   if ($form_id == 'user_register_form') {
     if (isset($_COOKIE['il-user-timezone'])) {
      $form['timezone']['timezone']['#default_value'] = $_COOKIE['il-user-timezone'];
@@ -208,7 +211,7 @@ function bo_system_entity_presave(EntityInterface $entity) {
         $currency = 'EUR';
         $store_storage = \Drupal::entityTypeManager()->getStorage('commerce_store');
         $default_store = $store_storage->loadDefault();
-      
+
         if ($default_store) {
           // Ottieni l'oggetto della valuta predefinita.
           $currency = $default_store->getDefaultCurrencyCode();
@@ -273,7 +276,7 @@ function bo_system_entity_presave(EntityInterface $entity) {
       $nid = $entity->id();
       $start = $entity->get('field_when')->value ?? NULL;
       $end = $entity->get('field_when')->end_value ?? NULL;
-  
+
       if ($nid && $start && $end) {
         $connection = \Drupal::database();
         $existing = $connection->select('bo_system_events', 'r')
@@ -281,7 +284,7 @@ function bo_system_entity_presave(EntityInterface $entity) {
           ->condition('nid', $nid)
           ->execute()
           ->fetchField();
-  
+
         if ($existing) {
           $connection->update('bo_system_events')
             ->fields([
@@ -315,4 +318,32 @@ function bo_system_preprocess_page(array &$variables) {
     // Attach the CSS library to the page.
     $variables['#attached']['library'][] = 'bo_system/admin-theme-css';
   }
+}
+
+/**
+ * Implements hook_node_access().
+ */
+function bo_system_node_access(NodeInterface $node, $op, AccountInterface $account) {
+  if ($op === 'view' && $node->bundle() === 'event') {
+    $currentUser = \Drupal::currentUser();
+    if ($currentUser->isAnonymous()) {
+      return AccessResult::forbidden();
+    }
+    if ($currentUser->id() == $node->getOwnerId()) {
+      return AccessResult::allowed();
+    }
+    $bookableEntity = $node->get('field_bookable_entity')->referencedEntities();
+    if ($bookableEntity) {
+      $bookableEntity = reset($bookableEntity);
+      if ($bookableEntity->getOwnerId() == $currentUser->id()) {
+        return AccessResult::allowed();
+      }
+    }
+    if ($currentUser->hasPermission('administer bookableentities')) {
+      return AccessResult::allowed();
+    }
+
+    return AccessResult::forbidden();
+  }
+  return AccessResult::neutral();
 }
